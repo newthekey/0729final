@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import time
-import graphviz
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -130,7 +129,7 @@ else:
     st.title("🌳 의사결정나무 시뮬레이션 웹앱")
     st.write(f"👋 **{st.session_state.student_name}** 학생! 기존 트리를 체험해보거나 **4번째 탭**에서 직접 의사결정나무를 만들어보세요.")
 
-    # Tab을 통해 주제 분리 (4번째 탭 추가)
+    # Tab을 통해 주제 분리
     tab1, tab2, tab3, tab4 = st.tabs([
         "🍕 1. 점심 메뉴 결정트리", 
         "🎈 2. 주말 활동 추천", 
@@ -190,17 +189,21 @@ else:
             st.markdown("---")
             st.subheader("💡 의사결정나무 도식화")
             
-            dot = graphviz.Digraph()
-            dot.node('A', f'예산: {budget}')
-            dot.node('B1', f'종류: {food_type}')
-            dot.node('B2', f'매운정도: {spicy}')
-            dot.node('C', f'결과: {result_food}', shape='box', style='filled', color='lightgreen')
-            
-            dot.edge('A', 'B1', label='1만원 이하' if budget == "1만원 이하" else '1만원 초과')
-            dot.edge('B1', 'B2', label=f'{food_type}')
-            dot.edge('B2', 'C', label='선택 조건 도달')
-            
-            st.graphviz_chart(dot)
+            # 텍스트 기반 Graphviz DOT 문자열 렌더링 (C 라이브러리 의존성 없음)
+            budget_label = '1만원 이하' if budget == '1만원 이하' else '1만원 초과'
+            dot_code = f"""
+            digraph {{
+                A [label="예산: {budget}"];
+                B1 [label="종류: {food_type}"];
+                B2 [label="매운정도: {spicy}"];
+                C [label="결과: {result_food}", shape=box, style=filled, color=lightgreen];
+
+                A -> B1 [label="{budget_label}"];
+                B1 -> B2 [label="{food_type}"];
+                B2 -> C [label="선택 조건 도달"];
+            }}
+            """
+            st.graphviz_chart(dot_code)
 
     # -------------------------------------------------------------------------
     # [주제 2] 주말 활동 추천 시스템
@@ -304,7 +307,7 @@ else:
             """)
 
     # -------------------------------------------------------------------------
-    # [주제 4] 나만의 의사결정나무 만들기 & 피드백 (신규 추가!)
+    # [주제 4] 나만의 의사결정나무 만들기 & 피드백
     # -------------------------------------------------------------------------
     with tab4:
         st.header("✏️ 나만의 의사결정나무 설계 실습")
@@ -318,26 +321,25 @@ else:
             st.write("**주제:** 태양계 행성 분류하기 (지구형 vs 목성형)")
             st.write("**최종 분류 대상:** 지구, 화성, 목성, 토성")
             
-            # 예시 트리의 Graphviz 도식화
-            ex_dot = graphviz.Digraph()
-            ex_dot.node('Q1', '질문1: 표면이 단단한 암석으로 되어있는가?')
-            ex_dot.node('Q2_1', '질문2-1: 생명체나 물이存在する가?')
-            ex_dot.node('Q2_2', '질문2-2: 아름다운 고리가 선명하게 보이는가?')
-            
-            ex_dot.node('R1', '지구 🌍', shape='box', style='filled', color='lightblue')
-            ex_dot.node('R2', '화성 붉은행성 🔴', shape='box', style='filled', color='lightpink')
-            ex_dot.node('R3', '토성 🪐', shape='box', style='filled', color='khaki')
-            ex_dot.node('R4', '목성 🌌', shape='box', style='filled', color='orange')
-            
-            ex_dot.edge('Q1', 'Q2_1', label='예 (암석형)')
-            ex_dot.edge('Q1', 'Q2_2', label='아니오 (가스형)')
-            
-            ex_dot.edge('Q2_1', 'R1', label='예')
-            ex_dot.edge('Q2_1', 'R2', label='아니오')
-            ex_dot.edge('Q2_2', 'R3', label='예')
-            ex_dot.edge('Q2_2', 'R4', label='아니오')
-            
-            st.graphviz_chart(ex_dot)
+            ex_dot_code = """
+            digraph {
+                Q1 [label="질문1: 표면이 단단한 암석으로 되어있는가?"];
+                Q2_1 [label="질문2-1: 생명체나 물이 존재하는가?"];
+                Q2_2 [label="질문2-2: 아름다운 고리가 선명하게 보이는가?"];
+                R1 [label="지구 🌍", shape=box, style=filled, color=lightblue];
+                R2 [label="화성 붉은행성 🔴", shape=box, style=filled, color=lightpink];
+                R3 [label="토성 🪐", shape=box, style=filled, color=khaki];
+                R4 [label="목성 🌌", shape=box, style=filled, color=orange];
+
+                Q1 -> Q2_1 [label="예 (암석형)"];
+                Q1 -> Q2_2 [label="아니오 (가스형)"];
+                Q2_1 -> R1 [label="예"];
+                Q2_1 -> R2 [label="아니오"];
+                Q2_2 -> R3 [label="예"];
+                Q2_2 -> R4 [label="아니오"];
+            }
+            """
+            st.graphviz_chart(ex_dot_code)
             
             st.success("""
             💬 **예시 트리 피드백 미리보기:**
@@ -375,25 +377,30 @@ else:
         with col_vis:
             st.write("▼ 완성된 트리 구조도")
             if q1 and q2_1 and q2_2:
-                user_dot = graphviz.Digraph()
-                user_dot.node('UQ1', f'1차: {q1}')
-                user_dot.node('UQ2_1', f'2차(A): {q2_1}')
-                user_dot.node('UQ2_2', f'2차(B): {q2_2}')
-                
-                user_dot.node('UR1', r1 if r1 else '결과1', shape='box', style='filled', color='lightyellow')
-                user_dot.node('UR2', r2 if r2 else '결과2', shape='box', style='filled', color='lightyellow')
-                user_dot.node('UR3', r3 if r3 else '결과3', shape='box', style='filled', color='lightgreen')
-                user_dot.node('UR4', r4 if r4 else '결과4', shape='box', style='filled', color='lightgreen')
-                
-                user_dot.edge('UQ1', 'UQ2_1', label='예')
-                user_dot.edge('UQ1', 'UQ2_2', label='아니오')
-                
-                user_dot.edge('UQ2_1', 'UR1', label='예')
-                user_dot.edge('UQ2_1', 'UR2', label='아니오')
-                user_dot.edge('UQ2_2', 'UR3', label='예')
-                user_dot.edge('UQ2_2', 'UR4', label='아니오')
-                
-                st.graphviz_chart(user_dot)
+                user_r1 = r1 if r1 else "결과A"
+                user_r2 = r2 if r2 else "결과B"
+                user_r3 = r3 if r3 else "결과C"
+                user_r4 = r4 if r4 else "결과D"
+
+                user_dot_code = f"""
+                digraph {{
+                    UQ1 [label="1차: {q1}"];
+                    UQ2_1 [label="2차(A): {q2_1}"];
+                    UQ2_2 [label="2차(B): {q2_2}"];
+                    UR1 [label="{user_r1}", shape=box, style=filled, color=lightyellow];
+                    UR2 [label="{user_r2}", shape=box, style=filled, color=lightyellow];
+                    UR3 [label="{user_r3}", shape=box, style=filled, color=lightgreen];
+                    UR4 [label="{user_r4}", shape=box, style=filled, color=lightgreen];
+
+                    UQ1 -> UQ2_1 [label="예"];
+                    UQ1 -> UQ2_2 [label="아니오"];
+                    UQ2_1 -> UR1 [label="예"];
+                    UQ2_1 -> UR2 [label="아니오"];
+                    UQ2_2 -> UR3 [label="예"];
+                    UQ2_2 -> UR4 [label="아니오"];
+                }}
+                """
+                st.graphviz_chart(user_dot_code)
             else:
                 st.info("왼쪽 양식에 질문을 채우면 의사결정나무가 자동으로 그려집니다!")
 
