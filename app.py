@@ -127,7 +127,7 @@ else:
     # 메인 화면 영역
     # -------------------------------------------------------------------------
     st.title("🌳 의사결정나무 시뮬레이션 웹앱")
-    st.write(f"👋 **{st.session_state.student_name}** 학생! 기존 트리를 체험해보거나 **4번째 탭**에서 직접 의사결정나무를 만들어보세요.")
+    st.write(f"👋 **{st.session_state.student_name}** 학생! 각 주제별 조건 선택에 따라 실시간으로 그려지는 **의사결정나무 시각화**를 확인해보세요.")
 
     # Tab을 통해 주제 분리
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -189,21 +189,22 @@ else:
             st.markdown("---")
             st.subheader("💡 의사결정나무 도식화")
             
-            # 텍스트 기반 Graphviz DOT 문자열 렌더링 (C 라이브러리 의존성 없음)
             budget_label = '1만원 이하' if budget == '1만원 이하' else '1만원 초과'
-            dot_code = f"""
+            dot_code1 = f"""
             digraph {{
                 A [label="예산: {budget}"];
                 B1 [label="종류: {food_type}"];
                 B2 [label="매운정도: {spicy}"];
+                B3 [label="국물유무: {soup}"];
                 C [label="결과: {result_food}", shape=box, style=filled, color=lightgreen];
 
                 A -> B1 [label="{budget_label}"];
                 B1 -> B2 [label="{food_type}"];
-                B2 -> C [label="선택 조건 도달"];
+                B2 -> B3 [label="{spicy}"];
+                B3 -> C [label="{soup}"];
             }}
             """
-            st.graphviz_chart(dot_code)
+            st.graphviz_chart(dot_code1)
 
     # -------------------------------------------------------------------------
     # [주제 2] 주말 활동 추천 시스템
@@ -250,12 +251,26 @@ else:
             st.success(f"**추천 결과:** {result_act}")
             
             st.markdown("---")
-            st.subheader("🔍 선택 조건 요약")
-            summary_df = pd.DataFrame({
-                '구분': ['장소', '동행', '활동성', '예산'],
-                '선택한 값': [place, companion, activity.split()[0], has_money.split()[0]]
-            })
-            st.table(summary_df)
+            st.subheader("💡 의사결정나무 도식화")
+            
+            act_simple = activity.split()[0]
+            money_simple = has_money.split()[0]
+            
+            dot_code2 = f"""
+            digraph {{
+                A [label="장소: {place}"];
+                B1 [label="동행: {companion}"];
+                B2 [label="활동성: {act_simple}"];
+                B3 [label="예산: {money_simple}"];
+                C [label="결과: {result_act}", shape=box, style=filled, color=lightskyblue];
+
+                A -> B1 [label="{place}"];
+                B1 -> B2 [label="{companion}"];
+                B2 -> B3 [label="{act_simple}"];
+                B3 -> C [label="{money_simple}"];
+            }}
+            """
+            st.graphviz_chart(dot_code2)
 
     # -------------------------------------------------------------------------
     # [주제 3] 콘텐츠 추천 (영화 / 웹툰)
@@ -300,11 +315,25 @@ else:
             st.info(f"**추천 작품:**\n\n{result_media}")
             
             st.markdown("---")
-            st.subheader("🧠 인공지능 수업 포인트")
-            st.write("""
-            * **의사결정나무(Decision Tree)**는 데이터를 질문(조건)에 따라 가지를 치며 분류하는 알고리즘입니다.
-            * 질문의 순서에 따라 나무의 모양이 달라지며, 효율적인 분류를 위해 **'정보 이득(Information Gain)'**이 높은 질문을 상단에 배치합니다.
-            """)
+            st.subheader("💡 의사결정나무 도식화")
+            
+            len_simple = length.split()[0]
+            
+            dot_code3 = f"""
+            digraph {{
+                A [label="장르: {genre}"];
+                B1 [label="분량: {len_simple}"];
+                B2 [label="분위기: {mood}"];
+                B3 [label="시약: {era}"];
+                C [label="{result_media}", shape=box, style=filled, color=khaki];
+
+                A -> B1 [label="{genre}"];
+                B1 -> B2 [label="{len_simple}"];
+                B2 -> B3 [label="{mood}"];
+                B3 -> C [label="{era}"];
+            }}
+            """
+            st.graphviz_chart(dot_code3)
 
     # -------------------------------------------------------------------------
     # [주제 4] 나만의 의사결정나무 만들기 & 피드백
