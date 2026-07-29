@@ -127,7 +127,7 @@ else:
     # 메인 화면 영역
     # -------------------------------------------------------------------------
     st.title("🌳 의사결정나무 시뮬레이션 웹앱")
-    st.write(f"👋 **{st.session_state.student_name}** 학생! 각 주제별 조건 선택에 따라 실시간으로 그려지는 **의사결정나무 시각화**를 확인해보세요.")
+    st.write(f"👋 **{st.session_state.student_name}** 학생! 조건 선택에 따라 전체 의사결정나무에서 **어떤 경로를 통해 결과에 도달하는지(강조 표시)** 확인해보세요.")
 
     # Tab을 통해 주제 분리
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -144,7 +144,7 @@ else:
         st.header("🍕 오늘의 점심 메뉴 결정트리")
         st.caption("조건: 예산, 음식 종류, 매운 정도, 국물 유무")
         
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([1, 1.2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -153,55 +153,78 @@ else:
             spicy = st.radio("3. 매운 음식을 잘 먹나요?", ["순한맛/안매움", "매콤/매운맛"], key="t1_spicy")
             soup = st.radio("4. 국물이 필요한가요?", ["국물 있음", "국물 없음"], key="t1_soup")
             
-            # 의사결정 로직
-            result_food = "김밥"
-            
+            # 결과 및 노드 ID 판별
             if budget == "1만원 이하":
                 if food_type == "한식/분식":
                     if spicy == "매콤/매운맛":
-                        result_food = "떡볶이 🌶️"
+                        result_food, active_leaf = "떡볶이 🌶️", "leaf_1"
                     else:
                         if soup == "국물 있음":
-                            result_food = "잔치국수 🍜"
+                            result_food, active_leaf = "잔치국수 🍜", "leaf_2"
                         else:
-                            result_food = "참치김밥 🍙"
-                else:  # 양식/일식/중식
+                            result_food, active_leaf = "참치김밥 🍙", "leaf_3"
+                else:
                     if spicy == "매콤/매운맛":
-                        result_food = "짬뽕 🍜"
+                        result_food, active_leaf = "짬뽕 🍜", "leaf_4"
                     else:
-                        result_food = "돈까스 🥩"
-            else:  # 1만원 초과
+                        result_food, active_leaf = "돈까스 🥩", "leaf_5"
+            else:
                 if spicy == "매콤/매운맛":
                     if soup == "국물 있음":
-                        result_food = "마라탕 🥘"
+                        result_food, active_leaf = "마라탕 🥘", "leaf_6"
                     else:
-                        result_food = "매운 닭갈비 🍗"
+                        result_food, active_leaf = "매운 닭갈비 🍗", "leaf_7"
                 else:
                     if soup == "국물 있음":
-                        result_food = "샤브샤브 🍲"
+                        result_food, active_leaf = "샤브샤브 🍲", "leaf_8"
                     else:
-                        result_food = "파스타 🍝"
+                        result_food, active_leaf = "파스타 🍝", "leaf_9"
 
         with col2:
             st.subheader("🎯 시뮬레이션 결과")
             st.success(f"**추천 결과:** {result_food}")
+            st.caption("🍊 **주황색/초록색**으로 표시된 노드가 학생이 선택한 분류 경로입니다.")
             
-            st.markdown("---")
-            st.subheader("💡 의사결정나무 도식화")
-            
-            budget_label = '1만원 이하' if budget == '1만원 이하' else '1만원 초과'
+            # 전체 트리의 하이라이트 스타일 설정
+            def get_node_style(node_id):
+                if node_id == active_leaf:
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                else:
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+
             dot_code1 = f"""
             digraph {{
-                A [label="예산: {budget}"];
-                B1 [label="종류: {food_type}"];
-                B2 [label="매운정도: {spicy}"];
-                B3 [label="국물유무: {soup}"];
-                C [label="결과: {result_food}", shape=box, style=filled, color=lightgreen];
+                rankdir=TB;
+                node [fontname="NanumGothic, Malgun Gothic, sans-serif"];
+                
+                Q1 [label="예산가 1만원 이하인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                
+                Q2_1 [label="한식/분식 인가?", shape=ellipse];
+                Q2_2 [label="매운 음식인가?", shape=ellipse];
+                
+                L1 [label="떡볶이 🌶️", {get_node_style('leaf_1')}];
+                L2 [label="잔치국수 🍜", {get_node_style('leaf_2')}];
+                L3 [label="참치김밥 🍙", {get_node_style('leaf_3')}];
+                L4 [label="짬뽕 🍜", {get_node_style('leaf_4')}];
+                L5 [label="돈까스 🥩", {get_node_style('leaf_5')}];
+                L6 [label="마라탕 🥘", {get_node_style('leaf_6')}];
+                L7 [label="매운 닭갈비 🍗", {get_node_style('leaf_7')}];
+                L8 [label="샤브샤브 🍲", {get_node_style('leaf_8')}];
+                L9 [label="파스타 🍝", {get_node_style('leaf_9')}];
 
-                A -> B1 [label="{budget_label}"];
-                B1 -> B2 [label="{food_type}"];
-                B2 -> B3 [label="{spicy}"];
-                B3 -> C [label="{soup}"];
+                Q1 -> Q2_1 [label="예", color="{ '#D84315' if budget == '1만원 이하' else '#CCCCCC' }", penwidth={ 3 if budget == '1만원 이하' else 1 }];
+                Q1 -> Q2_2 [label="아니오", color="{ '#D84315' if budget == '1만원 초과' else '#CCCCCC' }", penwidth={ 3 if budget == '1만원 초과' else 1 }];
+
+                Q2_1 -> L1 [label="한식+매움"];
+                Q2_1 -> L2 [label="한식+순함+국물"];
+                Q2_1 -> L3 [label="한식+순함+국물없음"];
+                Q2_1 -> L4 [label="기타+매움"];
+                Q2_1 -> L5 [label="기타+순함"];
+
+                Q2_2 -> L6 [label="매움+국물"];
+                Q2_2 -> L7 [label="매움+국물없음"];
+                Q2_2 -> L8 [label="순함+국물"];
+                Q2_2 -> L9 [label="순함+국물없음"];
             }}
             """
             st.graphviz_chart(dot_code1)
@@ -213,7 +236,7 @@ else:
         st.header("🎈 주말 활동 추천 시스템")
         st.caption("조건: 실내/실외, 혼자/함께, 동적/정적, 예산 유무")
         
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([1, 1.2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -222,52 +245,70 @@ else:
             activity = st.radio("3. 어떤 활동 스타일?", ["정적인 활동 (휴식/감상)", "동적인 활동 (체험/운동)"], key="t2_act")
             has_money = st.radio("4. 예산(용돈)이 있나요?", ["예산 있음 (유료)", "예산 없음 (무료)"], key="t2_money")
             
-            # 의사결정 로직
+            # 의사결정 로직 및 활성 노드 지정
             if place == "실내":
                 if companion == "혼자":
                     if activity.startswith("정적"):
-                        result_act = "도서관에서 책 읽기 📚"
+                        result_act, active_leaf2 = "도서관에서 책 읽기 📚", "leaf2_1"
                     else:
-                        result_act = "집에서 게임하기 🎮"
+                        result_act, active_leaf2 = "집에서 게임하기 🎮", "leaf2_2"
                 else:
                     if activity.startswith("정적"):
                         if has_money == "예산 있음 (유료)":
-                            result_act = "영화관람 🍿"
+                            result_act, active_leaf2 = "영화관람 🍿", "leaf2_3"
                         else:
-                            result_act = "보드게임 카페/동네 카페 ☕"
+                            result_act, active_leaf2 = "보드게임 카페/동네 카페 ☕", "leaf2_4"
                     else:
-                        result_act = "방탈출카페 🔍"
+                        result_act, active_leaf2 = "방탈출카페 🔍", "leaf2_5"
             else:
                 if activity.startswith("동적"):
                     if companion == "친구/가족과 함께":
-                        result_act = "축구 / 야외 스포츠 ⚽"
+                        result_act, active_leaf2 = "축구 / 야외 스포츠 ⚽", "leaf2_6"
                     else:
-                        result_act = "자전거 타기 / 러닝 🏃"
+                        result_act, active_leaf2 = "자전거 타기 / 러닝 🏃", "leaf2_7"
                 else:
-                    result_act = "공원 산책 / 버스킹 관람 🌳"
+                    result_act, active_leaf2 = "공원 산책 / 버스킹 관람 🌳", "leaf2_8"
 
         with col2:
             st.subheader("🎯 시뮬레이션 결과")
             st.success(f"**추천 결과:** {result_act}")
+            st.caption("🍊 **주황색/초록색**으로 표시된 노드가 학생이 선택한 분류 경로입니다.")
             
-            st.markdown("---")
-            st.subheader("💡 의사결정나무 도식화")
-            
-            act_simple = activity.split()[0]
-            money_simple = has_money.split()[0]
-            
+            def get_node_style2(node_id):
+                if node_id == active_leaf2:
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                else:
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+
             dot_code2 = f"""
             digraph {{
-                A [label="장소: {place}"];
-                B1 [label="동행: {companion}"];
-                B2 [label="활동성: {act_simple}"];
-                B3 [label="예산: {money_simple}"];
-                C [label="결과: {result_act}", shape=box, style=filled, color=lightskyblue];
+                rankdir=TB;
+                Q1 [label="활동 장소가 실내인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                
+                Q2_1 [label="혼자 하는가?", shape=ellipse];
+                Q2_2 [label="동적인 활동인가?", shape=ellipse];
+                
+                L1 [label="도서관에서 책 읽기 📚", {get_node_style2('leaf2_1')}];
+                L2 [label="집에서 게임하기 🎮", {get_node_style2('leaf2_2')}];
+                L3 [label="영화관람 🍿", {get_node_style2('leaf2_3')}];
+                L4 [label="동네 카페 ☕", {get_node_style2('leaf2_4')}];
+                L5 [label="방탈출카페 🔍", {get_node_style2('leaf2_5')}];
+                L6 [label="축구 / 야외 스포츠 ⚽", {get_node_style2('leaf2_6')}];
+                L7 [label="자전거 타기 / 러닝 🏃", {get_node_style2('leaf2_7')}];
+                L8 [label="공원 산책 🌳", {get_node_style2('leaf2_8')}];
 
-                A -> B1 [label="{place}"];
-                B1 -> B2 [label="{companion}"];
-                B2 -> B3 [label="{act_simple}"];
-                B3 -> C [label="{money_simple}"];
+                Q1 -> Q2_1 [label="실내", color="{ '#D84315' if place == '실내' else '#CCCCCC' }", penwidth={ 3 if place == '실내' else 1 }];
+                Q1 -> Q2_2 [label="실외", color="{ '#D84315' if place == '실외' else '#CCCCCC' }", penwidth={ 3 if place == '실외' else 1 }];
+
+                Q2_1 -> L1 [label="혼자+정적"];
+                Q2_1 -> L2 [label="혼자+동적"];
+                Q2_1 -> L3 [label="함께+정적+유료"];
+                Q2_1 -> L4 [label="함께+정적+무료"];
+                Q2_1 -> L5 [label="함께+동적"];
+
+                Q2_2 -> L6 [label="동적+함께"];
+                Q2_2 -> L7 [label="동적+혼자"];
+                Q2_2 -> L8 [label="정적"];
             }}
             """
             st.graphviz_chart(dot_code2)
@@ -279,7 +320,7 @@ else:
         st.header("🎬 영화 및 웹툰 콘텐츠 추천")
         st.caption("조건: 장르, 분량, 분위기, 최신/명작")
         
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns([1, 1.2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -288,49 +329,61 @@ else:
             mood = st.radio("3. 원하는 분위기는?", ["밝고 가벼움", "진지하고 어두움/웅장함"], key="t3_mood")
             era = st.radio("4. 어떤 작품을 원하나요?", ["최신 트렌드작", "검증된 고전/명작"], key="t3_era")
             
-            # 의사결정 로직
+            # 의사결정 로직 및 활성 노드 지정
             if genre == "액션/스릴러":
                 if mood == "밝고 가벼움":
-                    result_media = "웹툰: 《극주고도》 / 영화: 《극한직업》 🎬"
+                    result_media, active_leaf3 = "웹툰: 《극주고도》 / 영화: 《극한직업》 🎬", "leaf3_1"
                 else:
-                    result_media = "웹툰: 《나 혼자만 레벨업》 / 영화: 《다크 나이트》 🦇"
+                    result_media, active_leaf3 = "웹툰: 《나 혼자만 레벨업》 / 영화: 《다크 나이트》 🦇", "leaf3_2"
             elif genre == "코미디/일상":
                 if era == "최신 트렌드작":
-                    result_media = "웹툰: 《대학일기》류 일상툰 / 영화: 《육사오》 😆"
+                    result_media, active_leaf3 = "웹툰: 《대학일기》 / 영화: 《육사오》 😆", "leaf3_3"
                 else:
-                    result_media = "웹툰: 《마음의 소리》 / 영화: 《세 얼간이》 🤣"
+                    result_media, active_leaf3 = "웹툰: 《마음의 소리》 / 영화: 《세 얼간이》 🤣", "leaf3_4"
             elif genre == "판타지/SF":
                 if length.startswith("단편"):
-                    result_media = "영화: 《인터스텔라》 / Short 단편 웹툰 🚀"
+                    result_media, active_leaf3 = "영화: 《인터스텔라》 / SF 단편 🚀", "leaf3_5"
                 else:
-                    result_media = "웹툰: 《전지적 독자 시점》 / 영화: 《해리포터 시리즈》 🧙"
+                    result_media, active_leaf3 = "웹툰: 《전독시》 / 영화: 《해리포터》 🧙", "leaf3_6"
             else:
                 if mood == "밝고 가벼움":
-                    result_media = "웹툰: 《연애혁명》 / 영화: 《인사이드 아웃》 🌈"
+                    result_media, active_leaf3 = "웹툰: 《연애혁명》 / 영화: 《인사이드 아웃》 🌈", "leaf3_7"
                 else:
-                    result_media = "영화: 《너의 이름은.》 / 감성 로맨스 웹툰 🍁"
+                    result_media, active_leaf3 = "영화: 《너의 이름은.》 / 감성 웹툰 🍁", "leaf3_8"
 
         with col2:
             st.subheader("🎯 시뮬레이션 결과")
             st.info(f"**추천 작품:**\n\n{result_media}")
+            st.caption("🍊 **주황색/초록색**으로 표시된 노드가 학생이 선택한 분류 경로입니다.")
             
-            st.markdown("---")
-            st.subheader("💡 의사결정나무 도식화")
-            
-            len_simple = length.split()[0]
-            
+            def get_node_style3(node_id):
+                if node_id == active_leaf3:
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                else:
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+
             dot_code3 = f"""
             digraph {{
-                A [label="장르: {genre}"];
-                B1 [label="분량: {len_simple}"];
-                B2 [label="분위기: {mood}"];
-                B3 [label="시약: {era}"];
-                C [label="{result_media}", shape=box, style=filled, color=khaki];
+                rankdir=TB;
+                Q1 [label="선호 장르는 무엇인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                
+                L1 [label="《극한직업》 / 《극주고도》 🎬", {get_node_style3('leaf3_1')}];
+                L2 [label="《나 혼자만 레벨업》 / 《다크 나이트》 🦇", {get_node_style3('leaf3_2')}];
+                L3 [label="《대학일기》 / 《육사오》 😆", {get_node_style3('leaf3_3')}];
+                L4 [label="《마음의 소리》 / 《세 얼간이》 🤣", {get_node_style3('leaf3_4')}];
+                L5 [label="《인터스텔라》 🚀", {get_node_style3('leaf3_5')}];
+                L6 [label="《전지적 독자 시점》 / 《해리포터》 🧙", {get_node_style3('leaf3_6')}];
+                L7 [label="《연애혁명》 / 《인사이드 아웃》 🌈", {get_node_style3('leaf3_7')}];
+                L8 [label="《너의 이름은.》 🍁", {get_node_style3('leaf3_8')}];
 
-                A -> B1 [label="{genre}"];
-                B1 -> B2 [label="{len_simple}"];
-                B2 -> B3 [label="{mood}"];
-                B3 -> C [label="{era}"];
+                Q1 -> L1 [label="액션+밝음", color="{ '#D84315' if active_leaf3=='leaf3_1' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_1' else 1 }];
+                Q1 -> L2 [label="액션+어두움", color="{ '#D84315' if active_leaf3=='leaf3_2' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_2' else 1 }];
+                Q1 -> L3 [label="코미디+최신", color="{ '#D84315' if active_leaf3=='leaf3_3' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_3' else 1 }];
+                Q1 -> L4 [label="코미디+고전", color="{ '#D84315' if active_leaf3=='leaf3_4' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_4' else 1 }];
+                Q1 -> L5 [label="판타지+단편", color="{ '#D84315' if active_leaf3=='leaf3_5' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_5' else 1 }];
+                Q1 -> L6 [label="판타지+장편", color="{ '#D84315' if active_leaf3=='leaf3_6' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_6' else 1 }];
+                Q1 -> L7 [label="로맨스+밝음", color="{ '#D84315' if active_leaf3=='leaf3_7' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_7' else 1 }];
+                Q1 -> L8 [label="로맨스+감성", color="{ '#D84315' if active_leaf3=='leaf3_8' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_8' else 1 }];
             }}
             """
             st.graphviz_chart(dot_code3)
