@@ -144,7 +144,7 @@ else:
         st.header("🍕 오늘의 점심 메뉴 결정트리")
         st.caption("조건: 예산, 음식 종류, 매운 정도, 국물 유무")
         
-        col1, col2 = st.columns([1, 1.2])
+        col1, col2 = st.columns([1, 2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -188,19 +188,21 @@ else:
             # 전체 트리의 하이라이트 스타일 설정
             def get_node_style(node_id):
                 if node_id == active_leaf:
-                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3, fontsize=14'
                 else:
-                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5", fontsize=12'
 
             dot_code1 = f"""
             digraph {{
+                graph [dpi=150, nodesep=0.4, ranksep=0.6];
                 rankdir=TB;
-                node [fontname="NanumGothic, Malgun Gothic, sans-serif"];
+                node [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=13];
+                edge [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=11];
                 
-                Q1 [label="예산가 1만원 이하인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                Q1 [label="예산이 1만원 이하인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB", fontsize=14];
                 
-                Q2_1 [label="한식/분식 인가?", shape=ellipse];
-                Q2_2 [label="매운 음식인가?", shape=ellipse];
+                Q2_1 [label="한식/분식 인가?", shape=ellipse, fontsize=13];
+                Q2_2 [label="매운 음식인가?", shape=ellipse, fontsize=13];
                 
                 L1 [label="떡볶이 🌶️", {get_node_style('leaf_1')}];
                 L2 [label="잔치국수 🍜", {get_node_style('leaf_2')}];
@@ -227,7 +229,7 @@ else:
                 Q2_2 -> L9 [label="순함+국물없음"];
             }}
             """
-            st.graphviz_chart(dot_code1)
+            st.graphviz_chart(dot_code1, use_container_width=True)
 
     # -------------------------------------------------------------------------
     # [주제 2] 주말 활동 추천 시스템
@@ -236,7 +238,7 @@ else:
         st.header("🎈 주말 활동 추천 시스템")
         st.caption("조건: 실내/실외, 혼자/함께, 동적/정적, 예산 유무")
         
-        col1, col2 = st.columns([1, 1.2])
+        col1, col2 = st.columns([1, 2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -276,17 +278,21 @@ else:
             
             def get_node_style2(node_id):
                 if node_id == active_leaf2:
-                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3, fontsize=14'
                 else:
-                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5", fontsize=12'
 
             dot_code2 = f"""
             digraph {{
+                graph [dpi=150, nodesep=0.4, ranksep=0.6];
                 rankdir=TB;
-                Q1 [label="활동 장소가 실내인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                node [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=13];
+                edge [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=11];
+
+                Q1 [label="활동 장소가 실내인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB", fontsize=14];
                 
-                Q2_1 [label="혼자 하는가?", shape=ellipse];
-                Q2_2 [label="동적인 활동인가?", shape=ellipse];
+                Q2_1 [label="혼자 하는가?", shape=ellipse, fontsize=13];
+                Q2_2 [label="동적인 활동인가?", shape=ellipse, fontsize=13];
                 
                 L1 [label="도서관에서 책 읽기 📚", {get_node_style2('leaf2_1')}];
                 L2 [label="집에서 게임하기 🎮", {get_node_style2('leaf2_2')}];
@@ -311,7 +317,7 @@ else:
                 Q2_2 -> L8 [label="정적"];
             }}
             """
-            st.graphviz_chart(dot_code2)
+            st.graphviz_chart(dot_code2, use_container_width=True)
 
     # -------------------------------------------------------------------------
     # [주제 3] 콘텐츠 추천 (영화 / 웹툰)
@@ -320,7 +326,7 @@ else:
         st.header("🎬 영화 및 웹툰 콘텐츠 추천")
         st.caption("조건: 장르, 분량, 분위기, 최신/명작")
         
-        col1, col2 = st.columns([1, 1.2])
+        col1, col2 = st.columns([1, 2])
         
         with col1:
             st.subheader("📋 조건 선택하기")
@@ -358,14 +364,18 @@ else:
             
             def get_node_style3(node_id):
                 if node_id == active_leaf3:
-                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3'
+                    return 'shape=box, style="filled,bold", color="#2E7D32", fillcolor="#C8E6C9", penwidth=3, fontsize=14'
                 else:
-                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5"'
+                    return 'shape=box, style=filled, color="#CCCCCC", fillcolor="#F5F5F5", fontsize=12'
 
             dot_code3 = f"""
             digraph {{
+                graph [dpi=150, nodesep=0.4, ranksep=0.6];
                 rankdir=TB;
-                Q1 [label="선호 장르는 무엇인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB"];
+                node [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=13];
+                edge [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=11];
+
+                Q1 [label="선호 장르는 무엇인가?", shape=ellipse, style=filled, color="#1976D2", fillcolor="#BBDEFB", fontsize=14];
                 
                 L1 [label="《극한직업》 / 《극주고도》 🎬", {get_node_style3('leaf3_1')}];
                 L2 [label="《나 혼자만 레벨업》 / 《다크 나이트》 🦇", {get_node_style3('leaf3_2')}];
@@ -386,7 +396,7 @@ else:
                 Q1 -> L8 [label="로맨스+감성", color="{ '#D84315' if active_leaf3=='leaf3_8' else '#CCCCCC' }", penwidth={ 3 if active_leaf3=='leaf3_8' else 1 }];
             }}
             """
-            st.graphviz_chart(dot_code3)
+            st.graphviz_chart(dot_code3, use_container_width=True)
 
     # -------------------------------------------------------------------------
     # [주제 4] 나만의 의사결정나무 만들기 & 피드백
@@ -405,6 +415,10 @@ else:
             
             ex_dot_code = """
             digraph {
+                graph [dpi=150, nodesep=0.4, ranksep=0.6];
+                node [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=13];
+                edge [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=11];
+
                 Q1 [label="질문1: 표면이 단단한 암석으로 되어있는가?"];
                 Q2_1 [label="질문2-1: 생명체나 물이 존재하는가?"];
                 Q2_2 [label="질문2-2: 아름다운 고리가 선명하게 보이는가?"];
@@ -421,7 +435,7 @@ else:
                 Q2_2 -> R4 [label="아니오"];
             }
             """
-            st.graphviz_chart(ex_dot_code)
+            st.graphviz_chart(ex_dot_code, use_container_width=True)
             
             st.success("""
             💬 **예시 트리 피드백 미리보기:**
@@ -466,6 +480,10 @@ else:
 
                 user_dot_code = f"""
                 digraph {{
+                    graph [dpi=150, nodesep=0.4, ranksep=0.6];
+                    node [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=13];
+                    edge [fontname="NanumGothic, Malgun Gothic, sans-serif", fontsize=11];
+
                     UQ1 [label="1차: {q1}"];
                     UQ2_1 [label="2차(A): {q2_1}"];
                     UQ2_2 [label="2차(B): {q2_2}"];
@@ -482,7 +500,7 @@ else:
                     UQ2_2 -> UR4 [label="아니오"];
                 }}
                 """
-                st.graphviz_chart(user_dot_code)
+                st.graphviz_chart(user_dot_code, use_container_width=True)
             else:
                 st.info("왼쪽 양식에 질문을 채우면 의사결정나무가 자동으로 그려집니다!")
 
